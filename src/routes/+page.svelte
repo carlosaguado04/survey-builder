@@ -6,13 +6,14 @@
   let surveyQuestions = [];
   let addError = '';
   let questionBuilder;
+  let excelFileName = '';
 
   onMount(() => {
     questionBuilder = document.querySelector('svelte-component-wrapper').shadowRoot.querySelector('div');
   });
 
- function handleQuestionDone(event) {
-    const { type, name, label, required } = event.detail;
+  function handleQuestionDone(event) {
+    const { type, name, label, required, relevant } = event.detail;
 
     if (type === 'end_group') {
       surveyQuestions = [...surveyQuestions, { type: 'end_group' }];
@@ -23,7 +24,7 @@
         return;
       }
 
-      surveyQuestions = [...surveyQuestions, { type, name, label, required }];
+      surveyQuestions = [...surveyQuestions, { type, name, label, required, relevant }];
       addError = '';
 
       // Reset the QuestionBuilder
@@ -62,7 +63,7 @@
     XLSX.utils.book_append_sheet(wb, settingsWs, "settings");
 
     // Generate Excel file and trigger download
-    XLSX.writeFile(wb, "survey.xlsx");
+    XLSX.writeFile(wb, `${excelFileName}.xlsx`);
   }
 
   function resetSurvey() {
@@ -80,12 +81,13 @@
 
 </script>
 
-<main class="flex items-center flex-col">
+<main class="flex items-center flex-col" >
   <h1 class="text-2xl">Survey Builder</h1>
   
   <QuestionBuilder 
     on:done={handleQuestionDone}
     bind:this={questionBuilder}
+    {surveyQuestions}
   />
 
   {#if addError}
@@ -100,6 +102,7 @@
         <th>Name</th>
         <th>Label</th>
         <th>Required</th>
+        <th>Relevant</th>
       </tr>
     </thead>
     <tbody>
@@ -109,18 +112,28 @@
           <td>{question.name}</td>
           <td>{question.label}</td>
           <td>{question.required ? 'TRUE' : 'FALSE'}</td>
+          <td>{question.relevant}</td>
         </tr>
       {/each}
     </tbody>
   </table>
 
-  <div class="my-5">
-    <button class="btn variant-filled-success" on:click={downloadExcel} disabled={surveyQuestions.length === 0}>
+  <div class="my-5 flex-col w-2/3 items-center my-20d">
+    <label class="label" for="excelFileName">Excel File Name:</label>
+    <input
+      class="input"
+      id="excelFileName"
+      bind:value={excelFileName}
+      placeholder="Enter file name (without .xlsx)"
+    />
+    <div class="flex w-full justify-center">
+    <button class="btn variant-ghost-success my-5 mr-1.5" on:click={downloadExcel} disabled={surveyQuestions.length === 0}>
       Download Excel
     </button>
-    <button class="btn variant-filled-error" on:click={resetSurvey}>
+    <button class="btn variant-ghost-error my-5 ml-1.5" on:click={resetSurvey}>
       Reset Survey
     </button>
+    </div>
   </div>
 </main>
 

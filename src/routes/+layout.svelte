@@ -1,7 +1,6 @@
 <script>
 	import '../app.postcss';
 	import Nav from '../components/Nav.svelte';
-	import Footer from '../components/Footer.svelte'
 
 	// Highlight JS
 	import hljs from 'highlight.js/lib/core';
@@ -26,4 +25,3 @@
 
 <Nav/>
 <slot />
-<Footer/>

@@ -8,6 +8,23 @@
   let questionLabel = '';
   let questionRequired = false;
   let nameError = '';
+  let hasRelevancy = false;
+  let relevantQuestion = '';
+  let isValid = false;
+
+  export let surveyQuestions = [];
+
+  $: {
+    if (questionType && questionName && questionLabel) {
+      updateQuestion();
+    }
+  }
+
+  $: {
+    isValid = isValidQuestion();
+    console.log('isValid:', isValid);
+  }
+
 
   const questionTypes = [
     'integer',
@@ -23,10 +40,11 @@
 
   function handleTypeChange() {
     if (questionType === 'end_group') {
-      handleDone();
+      isValid = true;
     } else {
-      updateQuestion();
+      isValid = isValidQuestion();
     }
+    updateQuestion();
   }
 
   function handleNameInput() {
@@ -34,13 +52,16 @@
     
     if (questionName.length > 0) {
       nameError = '';
+      isValid = isValidQuestion();
       updateQuestion();
     } else {
       nameError = 'Name cannot be empty';
+      isValid = false;
     }
   }
 
   function handleLabelInput() {
+    isValid = isValidQuestion();
     updateQuestion();
   }
 
@@ -53,24 +74,24 @@
       type: questionType, 
       name: questionName, 
       label: questionLabel,
-      required: questionRequired
+      required: questionRequired,
+      relevant: hasRelevancy ? relevantQuestion : ''
     });
   }
 
   function handleKeyDown(event) {
     if (event.key === 'Enter' && isValidQuestion()) {
-      handleDone();
-    }
-  }
-
-  function handleDoneClick() {
-    if (isValidQuestion()) {
+      event.preventDefault(); // Prevent form submission if inside a form
       handleDone();
     }
   }
 
   function isValidQuestion() {
-    return questionType === 'end_group' || (questionType && questionName && questionLabel);
+    console.log('Validating:', { questionType, questionName, questionLabel, hasRelevancy, relevantQuestion });
+    if (questionType === 'end_group') return true;
+    if (!questionType || !questionName || !questionLabel) return false;
+    if (hasRelevancy && !relevantQuestion) return false;
+    return true;
   }
 
   function handleDone() {
@@ -81,7 +102,8 @@
         type: questionType, 
         name: questionName, 
         label: questionLabel,
-        required: questionRequired
+        required: questionRequired,
+        relevant: hasRelevancy ? `\${${relevantQuestion}} = ''` : ''
       });
     }
     clearFields();
@@ -92,6 +114,8 @@
     questionName = '';
     questionLabel = '';
     questionRequired = false;
+    hasRelevancy = false;
+    relevantQuestion = '';
     nameError = '';
   }
 
@@ -140,7 +164,7 @@
     </div>
 
     <div>
-      <label>Is this question required?</label>
+      <p>Is this question required?</p>
       <label>
         <input type="radio" name="required" value={true} bind:group={questionRequired} on:change={handleRequiredChange}>
         TRUE
@@ -150,11 +174,31 @@
         FALSE
       </label>
     </div>
+    <div>
+      <label>
+        <input type="checkbox" bind:checked={hasRelevancy}>
+        Does this question have relevancy?
+      </label>
+    </div>
+    {#if hasRelevancy}
+      <div>
+        <label for="relevantQuestion">Choose a previous question for relevancy:</label>
+        <select id="relevantQuestion" bind:value={relevantQuestion}>
+          <option value="">Select a question</option>
+          {#each surveyQuestions as question}
+            {#if question.name}
+              <option value={question.name}>{question.label}</option>
+            {/if}
+          {/each}
+        </select>
+      </div>
+    {/if}
   {/if}
 
-  <div class="flex w-full justify-center">
-  <button class="btn variant-filled-success my-5" on:click={handleDoneClick} disabled={!isValidQuestion()}>
-    Done
-  </button>
-</div>
+  <div class="flex w-full my-5 justify-center">
+
+    <button class="btn variant-ghost-success" on:click={handleDone} disabled={!isValid}>
+      Done
+    </button>
+  </div>
 </div>
