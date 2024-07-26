@@ -1,16 +1,36 @@
 <script>
-  import { onMount } from 'svelte';
   import * as XLSX from 'xlsx';
   import QuestionBuilder from '../components/QuestionBuilder.svelte';
 
   let surveyQuestions = [];
   let addError = '';
+  let questionBuilderRoot;
   let questionBuilder;
   let excelFileName = '';
+  let additionalExcelData = {
+    calculation: '',
+    rr_mapping: '',
+    constraint: '',
+    'constraint_message::English': '',
+    choice_filter: '',
+    'hint::English': '',
+    appearance: '',
+    default: '',
+    rr_view: '',
+    parameters: '',
+    'rr_label::English': ''
+  };
 
-  onMount(() => {
-    questionBuilder = document.querySelector('svelte-component-wrapper').shadowRoot.querySelector('div');
-  });
+  const predeterminedRows = [
+    { type: 'start', name: 'start', rr_mapping: 'm.creationDate', 'rr_label::English': 'Form Filling Start' },
+    { type: 'end', name: 'end', rr_mapping: 'm.version', 'rr_label::English': 'Form Filling End' },
+    { type: 'today', name: 'today', rr_view:'INVISIBLE' },
+    { type: 'deviceid', name: 'deviceid', rr_view:'INVISIBLE' },
+    { type: 'simserial', name: 'simserial', rr_view:'INVISIBLE' },
+    { type: 'imei', name: 'imei', rr_view:'INVISIBLE' },
+    { type: 'phonenumber', name: 'phonenumber', rr_view:'INVISIBLE' }
+  ];
+
 
   function handleQuestionDone(event) {
     const { type, name, label, required, relevant } = event.detail;
@@ -37,11 +57,29 @@
   }
 
   function downloadExcel() {
-    // Create a new workbook
     const wb = XLSX.utils.book_new();
+    const combinedData = [
+      ...predeterminedRows,
+      ...surveyQuestions.map(question => ({
+        ...question,
+        ...additionalExcelData,
+      }))
+    ];
 
-    // Create and add the "survey" sheet
-    const surveyWs = XLSX.utils.json_to_sheet(surveyQuestions);
+    const columnOrder = [
+      'type', 'name', 'label', 'rr_mapping', 'required', 'relevant',
+      'calculation', 'constraint', 'constraint_message::English', 'choice_filter', 'hint::English', 'appearance', 'parameters', 'rr_label::English'
+    ];
+
+    const orderedData = combinedData.map(row => {
+      const orderedRow = {};
+      columnOrder.forEach(col => {
+        orderedRow[col] = row[col] !== undefined ? row[col] : '';
+      });
+      return orderedRow;
+    });
+
+    const surveyWs = XLSX.utils.json_to_sheet(orderedData, {header: columnOrder});
     XLSX.utils.book_append_sheet(wb, surveyWs, "survey");
 
     // Create and add the "choices" sheet
@@ -57,7 +95,7 @@
 
     // Create and add the "settings" sheet
     const settingsData = [
-      { form_title: 'My Survey', form_id: 'my_survey_2023', version: '2023-07-26', default_language: 'english' }
+      { form_title: '', form_id: '', public_key: '', submission_url: '', default_language: "English", version: '', instance_name: '', rr_form_type: '', rr_matcher_field: '', rr_auto_group: '' }
     ];
     const settingsWs = XLSX.utils.json_to_sheet(settingsData);
     XLSX.utils.book_append_sheet(wb, settingsWs, "settings");
@@ -82,11 +120,11 @@
 </script>
 
 <main class="flex items-center flex-col" >
-  <h1 class="text-2xl">Survey Builder</h1>
+  <h1 class="text-2xl">Form Builder</h1>
   
   <QuestionBuilder 
     on:done={handleQuestionDone}
-    bind:this={questionBuilder}
+    bind:componentRoot={questionBuilderRoot}
     {surveyQuestions}
   />
 
@@ -124,7 +162,7 @@
       class="input"
       id="excelFileName"
       bind:value={excelFileName}
-      placeholder="Enter file name (without .xlsx)"
+      placeholder="Enter file id (all lowercase no spaces and without .xlsx)"
     />
     <div class="flex w-full justify-center">
     <button class="btn variant-ghost-success my-5 mr-1.5" on:click={downloadExcel} disabled={surveyQuestions.length === 0}>

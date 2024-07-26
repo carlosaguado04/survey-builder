@@ -13,6 +13,7 @@
   let isValid = false;
 
   export let surveyQuestions = [];
+  export let componentRoot;
 
   $: {
     if (questionType && questionName && questionLabel) {
@@ -22,18 +23,26 @@
 
   $: {
     isValid = isValidQuestion();
-    console.log('isValid:', isValid);
   }
 
 
   const questionTypes = [
     'integer',
+    'decimal',
+    'time',
+    'dateTime',
     'text',
     'select_one',
+    'select_one_from_file',
     'select_multiple',
     'date',
     'image',
     'note',
+    'calculate',
+    'rank',
+    'range',
+    'geopoint',
+    'barcode',
     'begin_group',
     'end_group'
   ];
@@ -87,11 +96,10 @@
   }
 
   function isValidQuestion() {
-    console.log('Validating:', { questionType, questionName, questionLabel, hasRelevancy, relevantQuestion });
     if (questionType === 'end_group') return true;
     if (!questionType || !questionName || !questionLabel) return false;
-    if (hasRelevancy && !relevantQuestion) return false;
-    return true;
+    return !(hasRelevancy && !relevantQuestion);
+
   }
 
   function handleDone() {
@@ -118,13 +126,9 @@
     relevantQuestion = '';
     nameError = '';
   }
-
-  export function reset() {
-    clearFields();
-  }
 </script>
 
-<div class="flex-col w-5/6">
+<div class="flex-col w-5/6" bind:this={componentRoot}>
   <label class="label" for="questionType">Select question type:</label>
   <select class="select" id="questionType" bind:value={questionType} on:change={handleTypeChange}>
     <option value="">Choose a type</option>
