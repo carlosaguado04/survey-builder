@@ -169,6 +169,7 @@
 			<p>Is this question required?</p>
 			<label>
 				<input
+					class="checkbox"
 					type="radio"
 					name="required"
 					value={true}
@@ -179,6 +180,7 @@
 			</label>
 			<label>
 				<input
+					class="checkbox"
 					type="radio"
 					name="required"
 					value={false}
@@ -190,7 +192,7 @@
 		</div>
 		<div>
 			<label>
-				<input type="checkbox" bind:checked={hasRelevancy} />
+				<input class="radio" type="checkbox" bind:checked={hasRelevancy} />
 				Does this question have relevancy?
 			</label>
 		</div>
