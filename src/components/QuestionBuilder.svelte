@@ -1,5 +1,6 @@
 <script>
 	import { createEventDispatcher } from 'svelte';
+	import { SlideToggle } from '@skeletonlabs/skeleton';
 
 	const dispatch = createEventDispatcher();
 
@@ -126,7 +127,7 @@
 	}
 </script>
 
-<div class="flex-col w-5/6" bind:this={componentRoot}>
+<div class="flex-col w-4/12" bind:this={componentRoot}>
 	<label class="label" for="questionType">Select question type:</label>
 	<select class="select" id="questionType" bind:value={questionType} on:change={handleTypeChange}>
 		<option value="">Choose a type</option>
@@ -136,7 +137,7 @@
 	</select>
 
 	{#if questionType && questionType !== 'end_group'}
-		<div>
+		<div class="my-5">
 			<label class="label" for="questionName">Enter question name:</label>
 			<input
 				class="input w-full"
@@ -165,7 +166,7 @@
 			/>
 		</div>
 
-		<div>
+		<div class="py-5">
 			<p>Is this question required?</p>
 			<label>
 				<input
@@ -191,10 +192,7 @@
 			</label>
 		</div>
 		<div>
-			<label>
-				<input class="radio" type="checkbox" bind:checked={hasRelevancy} />
-				Does this question have relevancy?
-			</label>
+			<SlideToggle name="slide" bind:checked={hasRelevancy} size="sm" active="bg-tertiary-500">Does this questios has relevancy?</SlideToggle>
 		</div>
 		{#if hasRelevancy}
 			<div>
@@ -213,7 +211,7 @@
 	{/if}
 
 	<div class="flex w-full my-5 justify-center">
-		<button class="btn variant-ghost-success" on:click={handleDone} disabled={!isValid}>
+		<button class="btn variant-ringed-primary" on:click={handleDone} disabled={!isValid}>
 			Done
 		</button>
 	</div>

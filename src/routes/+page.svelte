@@ -159,7 +159,7 @@
 	{/if}
 
 	<h2 class="my-5">Preview:</h2>
-	<table class="table table-hover w-5/6">
+	<table class="table table-hover w-3/4">
 		<thead>
 			<tr>
 				<th>Type</th>
@@ -192,13 +192,13 @@
 		/>
 		<div class="flex w-full justify-center">
 			<button
-				class="btn variant-soft-primary my-5 mr-1.5"
+				class="btn variant-ringed-success my-5 mr-1.5"
 				on:click={downloadExcel}
 				disabled={surveyQuestions.length === 0}
 			>
 				Download Excel
 			</button>
-			<button class="btn variant-ghost-error my-5 ml-1.5" on:click={resetSurvey}>
+			<button class="btn variant-ringed-error my-5 ml-1.5" on:click={resetSurvey}>
 				Reset Survey
 			</button>
 		</div>

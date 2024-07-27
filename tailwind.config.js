@@ -21,6 +21,18 @@ export default {
 				preset: [
 					{
 						name: 'wintry',
+						enhancements: true,
+					},
+					{
+						name: 'crimson',
+						enhancements: true,
+					},
+					{
+						name: 'skeleton',
+						enhancements: true,
+					},
+					{
+						name: 'modern',
 						enhancements: true
 					}
 				]

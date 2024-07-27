@@ -1,6 +1,11 @@
 <script>
 	import '../app.postcss';
 	import Nav from '../components/Nav.svelte';
+	import { AppShell } from '@skeletonlabs/skeleton';
+	import { theme } from '$lib/stores/theme';
+	import { onMount } from 'svelte';
+
+
 
 	// Highlight JS
 	import hljs from 'highlight.js/lib/core';
@@ -21,7 +26,26 @@
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
 	import { storePopup } from '@skeletonlabs/skeleton';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
-</script>
 
-<Nav/>
-<slot />
+	function applyTheme(newTheme) {
+		if (typeof document !== 'undefined') {
+			document.body.setAttribute('data-theme', newTheme);
+		}
+	}
+
+	$: applyTheme($theme);
+
+	onMount(() => {
+		applyTheme($theme);
+	});
+</script>
+<svelte:head>
+	<title>My SvelteKit App</title>
+</svelte:head>
+
+<AppShell>
+	<main>
+		<Nav/>
+		<slot />
+	</main>
+</AppShell>
